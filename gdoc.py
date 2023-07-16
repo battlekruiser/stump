@@ -1,12 +1,32 @@
 import gspread
+#import stats
 from datetime import datetime, date, time
 
 credential = gspread.service_account("budget-credentials.json")
-categories = [['Зарплата','Стипа','Халтурка','Долг','Подарок','Матпомощь','ХЗ'], ['Еда','Хозяйство','Абонентка','Медицина','Поездки','Электроника','Шмот',          'Расходники','Долг','Ignis','Fun','Подарки','Донат','Х3']]
-usernames = {'MayHatten': 'Соня', 'battlekruiser' : 'Саня'}
+#categories = [['Зарплата','Стипа','Халтурка','Долг','Подарок','Матпомощь','ХЗ'],
+#              ['Еда','Хозяйство','Абонентка','Медицина','Поездки','Электроника','Шмот/Косметика','Расходники','Долг','Ignis','Fun','Подарки','Донат','Х3']]
+
+
 
 url = "https://docs.google.com/spreadsheets/d/1LIljx0OIq4LguS7L2jwxuev-uIMtWCsQrOvEPx4pun8/edit#gid=1532825902"
 sheet = credential.open_by_url(url)
+
+def get_categories():
+    categories = [[],[]]
+    stat_sheet = sheet.get_worksheet(2)
+    titles = stat_sheet.row_values(2)
+    income_x = titles.index('Доход')
+    spend_x = titles.index('Расход')
+    res_x = titles.index('Остаток')
+    cats = stat_sheet.row_values(3)
+    categories[0]=cats[income_x:spend_x-1]
+    categories[1]=cats[spend_x:res_x-1]
+    return categories
+
+categories = get_categories()
+
+usernames = {'MayHatten': 'Соня', 'battlekruiser' : 'Саня'}
+userids   = {'MayHatten': 0,      'battlekruiser' : 1}
 
 def get_row_number(sheet):
     values = sheet.get_all_values()
@@ -14,6 +34,8 @@ def get_row_number(sheet):
         if len(val[0])==0:
             return i
     return len(values)
+
+
 
 def add_record(sheet,id_,obj,sum_,cat,user,place=None):
     inp = sheet.get_worksheet(id_)
