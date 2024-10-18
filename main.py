@@ -35,8 +35,8 @@ def split_transaction(update):
     payload = update.message.text
     split = payload.split('\n')
     obj = split[1]
-    #sum_ = float(split[2])
-    sum_ = split[2]
+    sum_ = float(split[2]) #TODO make an error handler
+    #sum_ = split[2]
     cat = ''
     place = ''
     user = gdoc.usernames[update.message.chat.username]
@@ -75,7 +75,7 @@ async def stat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         retval = stats.get_stats_year(gdoc.userids[update.message.chat.username], year)
     await context.bot.send_document(chat_id=update.effective_chat.id, document='Income.png')
-    await context.bot.send_document(chat_id=update.effective_chat.id, document='Spend.png')
+    await context.bot.send_document(chat_id=update.effective_chat.id, document='Spend.png') #TODO delete the pics after send
     await context.bot.send_message(chat_id=update.effective_chat.id, text=retval)
 
 

@@ -8,7 +8,7 @@ credential = gspread.service_account("budget-credentials.json")
 
 
 
-url = "https://docs.google.com/spreadsheets/d/1LIljx0OIq4LguS7L2jwxuev-uIMtWCsQrOvEPx4pun8/edit#gid=1532825902"
+url = "https://docs.google.com/spreadsheets/d/1LIljx0OIq4LguS7L2jwxuev-uIMtWCsQrOvEPx4pun8/edit"
 sheet = credential.open_by_url(url)
 
 def get_categories():
@@ -45,11 +45,13 @@ def add_record(sheet,id_,obj,sum_,cat,user,place=None):
     month = cur_date[1]
     day = cur_date[2]
     str_data = '%d.%d.%d' %(day,month,year)
+    print(str_data)
     if cat not in categories[id_]:
         cat = categories[id_][-1]
     #if user not in usernames:
     #    user = usernames['MayHatten']
-    record = [str_data,day,month,year,obj,sum_,cat,user]
+    record = [day,month,year,obj,sum_,cat,user]
     if id_==1 and place:
         record.append(place)
-    inp.update('A%d'%(row_number),[record])
+    inp.update('A%d'%(row_number),str_data,raw=False) #https://docs.gspread.org/en/v5.12.0/api/models/worksheet.html#gspread.worksheet.Worksheet.update
+    inp.update('B%d'%(row_number),[record])
