@@ -1,8 +1,11 @@
 import asyncio
 import logging
+import traceback
+
 import telegram
 import gdoc
 import stats
+
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler
 
@@ -12,6 +15,10 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
+
+logger = logging.getLogger(__name__)
+loggerhttpx = logging.getLogger('httpx')
+loggerhttpx.setLevel('WARNING') #now it doesn't shit every heartbeat
 
 token = None
 with open('token') as f: #TODO: handle lack of token file
@@ -78,7 +85,15 @@ async def stat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_document(chat_id=update.effective_chat.id, document='Spend.png') #TODO delete the pics after send
     await context.bot.send_message(chat_id=update.effective_chat.id, text=retval)
 
-
+async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+    # https://docs.python-telegram-bot.org/en/v21.6/examples.errorhandlerbot.html
+    # https://docs.python.org/3/library/logging.html#logging.Logger.debug
+    logger.error("Exception while handling an update:", exc_info=context.error)
+    #logger.error('the error was above')
+    tb_list = traceback.format_exception(None, context.error, context.error.__traceback__)
+    tb_string = "".join(tb_list)
+    await context.bot.send_message(chat_id=update.effective_chat.id,text=str(context.error))
+    
 
 if __name__ == '__main__':
     application = ApplicationBuilder().token(token).build()
@@ -94,5 +109,7 @@ if __name__ == '__main__':
     application.add_handler(CommandHandler('categories',cat))
     application.add_handler(CommandHandler('cat',cat))
     application.add_handler(CommandHandler('stats',stat))
+    
+    application.add_error_handler(error_handler)
     
     application.run_polling()
